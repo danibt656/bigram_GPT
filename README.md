@@ -29,8 +29,8 @@ Where `-f` was the file used during the training phase and `--generate` is the n
 
 ***
 
-Original sources:
+### References
 
-Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A.N., Kaiser, Ł. and Polosukhin, I., 2017. *Attention is all you need*. Advances in neural information processing systems, 30. [Link](https://arxiv.org/abs/1706.03762)
+Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A.N., Kaiser, Ł. and Polosukhin, I., 2017. *Attention is all you need*. Advances in neural information processing systems, 30. <a href="https://arxiv.org/abs/1706.03762" target="_blank">Link</a>
 
-He, K., Zhang, X., Ren, S. and Sun, J., 2016. *Deep residual learning for image recognition*. In Proceedings of the IEEE conference on computer vision and pattern recognition (pp. 770-778). [Link](https://arxiv.org/abs/1512.03385)
+He, K., Zhang, X., Ren, S. and Sun, J., 2016. *Deep residual learning for image recognition*. In Proceedings of the IEEE conference on computer vision and pattern recognition (pp. 770-778). <a href="https://arxiv.org/abs/1512.03385" target="_blank">Link</a>
