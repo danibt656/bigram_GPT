@@ -14,7 +14,7 @@ parser.add_argument('-g','--generate', help='Generate text based on a pre-traine
 args = vars(parser.parse_args())
 
 filename = args['file']
-SAVE_PATH = "model"
+SAVE_PATH = "models/model"
 
 # ----------------
 # hyperparameters
