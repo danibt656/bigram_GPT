@@ -8,25 +8,27 @@ from torch.nn import functional as F
 # Args
 # %%%%%%%%%%%%%
 parser = argparse.ArgumentParser(description='tinyGPT')
-parser.add_argument('-f','--file', help='Input file for training', required=True)
-parser.add_argument('-i','--max_iters', help='Iterations for learning', required=True)
+parser.add_argument('-f','--file', help='Input training file', required=True)
+parser.add_argument('-i','--max_iters', help='Iterations for learning', required=False)
+parser.add_argument('-g','--generate', help='Generate text based on a pre-trained model', required=False)
 args = vars(parser.parse_args())
 
 filename = args['file']
+SAVE_PATH = "model"
 
 # ----------------
 # hyperparameters
 batch_size = 64 # how many independent sequences will we process in parallel
 block_size = 256 # what is the maximum context length for predictions
-max_iters = int(args['max_iters'])
+max_iters = int(args['max_iters']) if args['max_iters'] else 5000
 eval_interval = max_iters//10
 learning_rate = 3e-4
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 print(f'Defaulting device to {device}')
 eval_iters = 200
 n_embd = 384
-n_heads = 6
-n_layer = 6 # how many resBlocks to create
+n_heads = 3
+n_layer = 3 # how many resBlocks to create
 dropout = 0.2
 # ----------------
 
@@ -200,25 +202,48 @@ class BigramLanguageModel(nn.Module):
             idx = torch.cat((idx, idx_next), dim=1)
         return idx
 
-model = BigramLanguageModel()
-model.to(device)
 
-# Train the Bigram model
-optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
+def generate_some_text(num_chars):
+    model = BigramLanguageModel()
+    model.load_state_dict(torch.load(SAVE_PATH))
+    model.to(device)
+    context = torch.zeros((1,1), dtype=torch.long, device=device)
+    return decode(model.generate(context, max_new_tokens=num_chars)[0].tolist())
 
-for iter in range(max_iters):
-    if iter % eval_interval == 0:
-        losses = estimate_loss()
-        print(f"step {iter}: train loss {losses['train']:.4f}, val loss {losses['val']:.4f}")
-    
-    # sample a batch of data
-    xb, yb = get_batch('train')
-    
-    # evaluate the loss
-    logits, loss = model(xb, yb)
-    optimizer.zero_grad(set_to_none=True)
-    loss.backward()
-    optimizer.step()
-    
-context = torch.zeros((1,1), dtype=torch.long, device=device)
-print(decode(model.generate(context, max_new_tokens=500)[0].tolist()))
+##################################################################################################
+##################################################################################################
+##################################################################################################
+
+if not args['generate']:
+    model = BigramLanguageModel()
+    model.to(device)
+
+    # Train the Bigram model
+    optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
+
+    print('Beginning training')
+    for iter in range(max_iters):
+        if iter % eval_interval == 0:
+            losses = estimate_loss()
+            torch.save(model.state_dict(), SAVE_PATH)
+            print(f"step {iter}: train loss {losses['train']:.4f}, val loss {losses['val']:.4f}")
+        
+        # sample a batch of data
+        xb, yb = get_batch('train')
+        
+        # evaluate the loss
+        logits, loss = model(xb, yb)
+        optimizer.zero_grad(set_to_none=True)
+        loss.backward()
+        optimizer.step()
+
+    torch.save(model.state_dict(), SAVE_PATH)
+
+    # Generating stuff
+    print(generate_some_text(400))
+
+else:
+    text = generate_some_text(int(args['generate']))
+
+    with open('output.txt', 'w') as f:
+        f.write(text)
